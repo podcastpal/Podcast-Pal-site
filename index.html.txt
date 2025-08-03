@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Podcast Pal Chatbot</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+    .chatbox {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    .chat-log {
+      height: 300px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .chat-input {
+      display: flex;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .chat-input button {
+      padding: 10px;
+    }
+    .message { margin: 5px 0; }
+    .user { text-align: right; color: #4a90e2; }
+    .bot { text-align: left; color: #333; }
+  </style>
+</head>
+<body>
+  <div class="chatbox">
+    <h2>🎙️ Podcast Pal</h2>
+    <div id="chatLog" class="chat-log"></div>
+    <div class="chat-input">
+      <input id="userInput" type="text" placeholder="Ask me about podcasting...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatLog = document.getElementById('chatLog');
+
+    function appendMessage(sender, text) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      msg.textContent = text;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('userInput');
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      appendMessage('user', userMessage);
+      input.value = '';
+
+      const apiKey = 'YOUR_OPENAI_API_KEY'; // Replace with your actual key
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            { role: 'system', content: 'You are Podcast Pal, a friendly assistant that helps people get into podcasting. Ask questions like "Do you have a podcast?" and follow up based on yes/no answers. Offer guidance, encouragement, and links when appropriate.' },
+            { role: 'user', content: userMessage }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      const botReply = data.choices?.[0]?.message?.content;
+      appendMessage('bot', botReply);
+    }
+  </script>
+</body>
+</html>
+
+
